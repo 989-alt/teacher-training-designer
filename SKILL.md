@@ -1,13 +1,13 @@
 ---
 name: teacher-training-designer
-description: Designs multi-session teacher professional-development trainings (교원연수/직무연수) that are explicitly justified against a competency/behavioral-indicator framework (역량체계, 행동지표) — by default Korea's "AI·디지털 교육 역량체계" (A~G, 21개 세부지표), or any other framework the user supplies. This skill should be used when a user asks to plan a 차시별 교원연수, wants activities mapped to specific 역량/행동지표, says things like "역량 기반 연수 설계해줘", "차시별 진행안 짜줘", "이 역량표 참고해서 연수 계획 세워줘", or shares a competency-table URL/screenshot alongside a training topic and session count. Not for single classroom lessons aimed at students (use a general lesson-planning approach instead), and not for trainings where no competency justification is needed.
+description: Designs multi-session teacher professional-development trainings (교원연수/직무연수) that are explicitly justified against a competency/behavioral-indicator framework (역량체계, 행동지표), and plans the accompanying slide-deck production to a "complete beginner can follow the whole training from the material alone" standard — by default Korea's "AI·디지털 교육 역량체계" (A~G, 21개 세부지표), or any other framework the user supplies. This skill should be used when a user asks to plan a 차시별 교원연수, wants activities mapped to specific 역량/행동지표, says things like "역량 기반 연수 설계해줘", "차시별 진행안 짜줘", "이 역량표 참고해서 연수 계획 세워줘", "연수 슬라이드/교안 제작 계획 짜줘", or shares a competency-table URL/screenshot alongside a training topic and session count. Not for single classroom lessons aimed at students (use a general lesson-planning approach instead), and not for trainings where no competency justification is needed.
 ---
 
 # Teacher Training Designer
 
 ## Overview
 
-이 스킬은 "연수 주제 + 차시 수"를 입력받아, 역량·행동지표 프레임워크에 명시적으로 근거를 둔 차시별 교원연수 설계안을 만든다. 대화형으로 제약 조건을 확인하고, 역량 조합을 트레이드오프와 함께 제안하고, 분 단위 진행안을 지표와 연결해 설계한 뒤 문서로 저장하는 전 과정을 다룬다.
+이 스킬은 "연수 주제 + 차시 수"를 입력받아, 역량·행동지표 프레임워크에 명시적으로 근거를 둔 차시별 교원연수 설계안을 만든다. 대화형으로 제약 조건을 확인하고, 역량 조합을 트레이드오프와 함께 제안하고, 분 단위 진행안을 지표와 연결해 설계한 뒤 문서로 저장하는 전 과정을 다룬다. 설계안이 확정되면, 이어서 실제 슬라이드 자료 제작 계획(분량 산정·이미지 소싱·제작 워크플로우)까지 같은 원칙(대화형 확인 → 계획 제시 → 확정 후 제작)으로 다룬다.
 
 ## Workflow
 
@@ -53,16 +53,29 @@ brainstorming 스킬과 동일한 원칙(한 번에 하나씩, 객관식 선호,
 
 `assets/design-template.md`를 뼈대로 최종 문서를 완성해 저장한다. 저장 위치를 사용자가 지정하지 않으면 현재 작업 중인 프로젝트 폴더의 `docs/plans/YYYY-MM-DD-<주제>-training-design.md`를 기본값으로 제안한다. git commit은 사용자가 명시적으로 요청할 때만 수행한다.
 
+### Step 7. 슬라이드 자료 제작 계획 (설계안 확정 후, 요청 시)
+
+연수 설계안(Step 0~6)이 끝나고 사용자가 발표 자료·슬라이드·교안 제작으로 넘어가면 `references/slide-production-standard.md`의 절차를 따른다. 요약:
+
+1. **완결성 기준 확인** — "연수를 전혀 듣지 않은 초보 수강생이 교안만으로 모든 내용을 완벽히 따라갈 수 있을 정도"가 기본 기준. 슬라이드 1장마다 (a)지금 보는 화면이 무엇인지 (b)무엇을 왜 하는지 (c)그대로 복사 가능한 정확한 문자열 (d)막혔을 때 대처, 4가지를 텍스트로도 확인 가능하게 한다.
+2. **분량 산정 — 사용자에게 반드시 확인**: "한 스텝 = 한 슬라이드" 원칙으로 세분화하면 다차시 연수는 쉽게 90장을 넘어간다. "전체 차시 합산 기준"인지 "차시당 기준"인지(총량이 몇 배 차이 남) 먼저 묻고, 차시/섹션별 예상 장수를 표로 제시해 확인받는다.
+3. **이미지 소싱 3단계를 사용자에게 확인**: ①실제 캡처 가능한 것(브라우저 자동화로 지금 캡처) ②생성형 이미지로 대체(터미널·데스크톱·개념도 등 — 정확한 텍스트를 먼저 확보한 뒤 `brand-pptx` 스킬의 kie.ai 파이프라인으로 생성) ③사용자 직접 캡처(개인 환경 의존적이거나 Claude가 실행 권한이 없는 화면 — 목록을 명시적으로 전달, 조용히 생략하지 않음). 우선순위와 각 단계에 무엇이 해당하는지는 `assets/slide-plan-template.md`로 정리해 확인받는다.
+4. **제작은 계획 확정 후에만 시작한다.** 분량표·소싱 매트릭스를 사용자가 확인하기 전에 실제 슬라이드(html2pptx 등)를 만들지 않는다.
+5. 실제 제작 시 `pptx.md` 규칙을 따른다 — **python-pptx 절대 사용 금지**, html2pptx 워크플로우, 사용자가 다른 테마를 지정하지 않는 한 white minimal 기본.
+
 ## 참고 자료
 
 - `references/competency-framework.md` — 기본 역량체계 표(A~G, 21개 지표) 전문 + 역량 성격 요약 + 조합 관례(실측 사례 포함)
 - `references/example-document-format.md` — 원본 예시 교안에서 추출한 문서 구조, 그리고 "학생 대상 단일 수업" 원본과 "교사 대상 다차시 연수"인 이 스킬 산출물이 어떻게 다른지
-- `assets/design-template.md` — 최종 산출 문서의 빈칸 템플릿 (모든 절 포함)
+- `references/slide-production-standard.md` — 슬라이드 제작 완결성 기준, 분량 산정 방법, 3단계 이미지 소싱 우선순위, 제작 워크플로우
+- `assets/design-template.md` — 최종 연수 설계 문서의 빈칸 템플릿 (모든 절 포함)
+- `assets/slide-plan-template.md` — 슬라이드 제작 계획 문서의 빈칸 템플릿 (분량표·소싱 매트릭스·워크플로우)
 
 ## 원칙
 
 - **한 번에 하나씩 질문한다.** 여러 항목을 한 메시지에 몰아 묻지 않는다.
-- **섹션 단위로 제시하고 매번 확인받는다.** 개요 → 역량연계 → 차시별 진행안 순으로, 앞 섹션이 확정되기 전에 뒤 섹션을 설계하지 않는다. 단, 사용자가 명시적으로 "한 번에 다 보여줘"라고 하면 따른다.
+- **섹션 단위로 제시하고 매번 확인받는다.** 개요 → 역량연계 → 차시별 진행안 → (요청 시) 슬라이드 제작 계획 순으로, 앞 섹션이 확정되기 전에 뒤 섹션을 설계하지 않는다. 단, 사용자가 명시적으로 "한 번에 다 보여줘"라고 하면 따른다.
 - **역량 개수를 억지로 채우지 않는다.** 관련성이 낮은 역량을 개수 맞추기용으로 추가하지 않는다. 최대 2개 core 원칙이 기본이며, 사용자가 그 이상을 요구하면 왜 벗어나는지 근거를 함께 제시한다.
 - **사용자가 지정한 필수 포함 요소는 절대 누락하지 않는다.** 명령어, 개념, 도구명 등을 요청받으면 반드시 시간 배분에 정확히 반영하고, 정확성(특히 실행 명령어)을 검증한다.
 - **지표는 활동과 관찰 가능한 행동에 반드시 연결한다.** "이 역량을 다룬다"고 선언만 하지 않고, 어느 Step에서 무엇을 하면 그 지표가 드러나는지 항상 명시한다.
+- **슬라이드 제작에서도 계획과 제작을 분리한다.** 분량·이미지 소싱 방법은 사용자 확인 전에 확정하지 않고, 소싱 우선순위(①실캡처②생성형③사용자 캡처)를 조용히 건너뛰지 않는다. 부정확한 명령어·화면을 생성형 이미지로 만들지 않는다.
