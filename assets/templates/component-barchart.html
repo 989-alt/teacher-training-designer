@@ -1,0 +1,70 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8">
+<!-- ============================================================
+     Aurora Ascendant — hero bar chart, crafted image (NOT a native chart)
+     Reference-matching: wide rounded-top bars, horizontal hue journey
+     (indigo->violet->coral), vertical fade (saturated top -> pale base),
+     floating glass value badges, soft foot glow, no axis cage, thin labels.
+
+     HOW TO USE
+     1) Point the stylesheet at the deck's base.css (fonts + tokens).
+     2) Edit CONFIG below: DATA (label,value), size to match the target slot
+        (measure the html2pptx placeholder: w_in*96 x h_in*96 px), ramp anchors.
+     3) Render to a transparent PNG:  node scripts/render_component_png.js \
+          --html assets/templates/component-barchart.html --sel "#box" --out images/barchart.png
+     4) Drop into the slot: after html2pptx, slide.addImage({path, ...placeholders['bar-slot']}).
+        Keep the placeholder div EMPTY in the slide HTML.
+     ============================================================ -->
+<link rel="stylesheet" href="../../workspace/base.css"><!-- adjust to your deck's base.css -->
+<style>
+  html,body{width:auto;height:auto;overflow:visible;background:transparent;}
+  #box{position:relative;background:transparent;font-family:var(--kr,"sans-serif");}
+  #plot{position:absolute;left:0;right:0;top:0;}
+  .bar{position:absolute;bottom:0;border-radius:14px 14px 5px 5px;}
+  .glow{position:absolute;border-radius:50%;filter:blur(7px);opacity:.5;}
+  .badge{position:absolute;display:flex;align-items:center;justify-content:center;
+    height:19px;padding:0 9px;border-radius:999px;background:rgba(255,255,255,.9);
+    box-shadow:0 3px 9px -3px rgba(58,66,132,.4),inset 0 0 0 1px rgba(255,255,255,.9);
+    font-family:var(--num,"sans-serif");font-weight:400;font-size:10.5px;line-height:1;transform:translateX(-50%);}
+  .blab{position:absolute;text-align:center;font-family:var(--kr,"sans-serif");font-weight:400;
+    font-size:10px;color:var(--c-ink-muted,#9AA0B4);line-height:1.32;transform:translateX(-50%);}
+  #baseline{position:absolute;left:0;right:0;bottom:0;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(90,111,224,.16) 12%,rgba(90,111,224,.16) 88%,transparent);}
+</style></head>
+<body>
+  <div id="box"><div id="plot"><div id="baseline"></div></div></div>
+<script>
+  // ---------- CONFIG (edit per slide) ----------
+  const DATA = [                      // [label(HTML, <br> allowed), value 0..100]
+    ["발이<br>넓다",92],["손이<br>크다",80],["귀가<br>얇다",61],["입이<br>무겁다",78],
+    ["발 벗고<br>나서다",74],["미역국<br>먹다",56],["시치미<br>떼다",53],["간이<br>크다",85]
+  ];
+  const BOX_W = 652, BOX_H = 269;     // = placeholder slot px (w_in*96 x h_in*96)
+  const BAR_W = 52, PAD_S = 30;       // bar width, side padding
+  const PLOT_H = 224, MAX_BAR_H = 196;// bar band height; tallest bar (leaves badge headroom)
+  const RAMP = [[91,111,224],[155,126,217],[240,120,156]]; // indigo -> violet -> coral
+  const SHOW_BADGES = true;
+  // ---------------------------------------------
+
+  const box=document.getElementById('box'), plot=document.getElementById('plot');
+  box.style.width=BOX_W+'px'; box.style.height=BOX_H+'px'; plot.style.height=PLOT_H+'px';
+  const lerp=(a,b,t)=>a+(b-a)*t;
+  const ramp=t=>{ const [c0,c1,u]=t<=.5?[RAMP[0],RAMP[1],t*2]:[RAMP[1],RAMP[2],(t-.5)*2];
+    return [0,1,2].map(k=>Math.round(lerp(c0[k],c1[k],u))); };
+  const mixWhite=(c,w)=>c.map(v=>Math.round(lerp(v,255,w)));
+  const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`, rgba=(c,a)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  const n=DATA.length, gap=(BOX_W-2*PAD_S-n*BAR_W)/(n-1);
+  DATA.forEach((d,i)=>{
+    const [label,v]=d, left=PAD_S+i*(BAR_W+gap), cx=left+BAR_W/2, h=Math.round(v/100*MAX_BAR_H);
+    const top=ramp(n>1?i/(n-1):0), bot=mixWhite(top,0.52);
+    const g=document.createElement('div'); g.className='glow';
+    g.style.cssText=`left:${cx-BAR_W*0.55}px;bottom:-6px;width:${BAR_W*1.1}px;height:16px;background:${rgba(top,0.55)}`; plot.appendChild(g);
+    const bar=document.createElement('div'); bar.className='bar';
+    bar.style.cssText=`left:${left}px;width:${BAR_W}px;height:${h}px;background:linear-gradient(180deg,${rgb(top)} 0%,${rgb(mixWhite(top,0.18))} 38%,${rgb(bot)} 100%)`; plot.appendChild(bar);
+    if(SHOW_BADGES){ const b=document.createElement('div'); b.className='badge';
+      b.style.left=cx+'px'; b.style.bottom=(h+8)+'px';
+      b.style.color=rgb(top.map(x=>Math.round(x*0.82))); b.textContent=v+'%'; plot.appendChild(b); }
+    const l=document.createElement('div'); l.className='blab';
+    l.style.cssText=`left:${cx}px;top:${PLOT_H+9}px;width:${BAR_W+gap}px`; l.innerHTML=label; box.appendChild(l);
+  });
+</script>
+</body></html>
